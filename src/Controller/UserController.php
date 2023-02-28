@@ -2,33 +2,45 @@
 
 namespace App\Controller;
 
+use App\Entity\User;
+use App\Form\RegisterType;
+
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
+use Doctrine\Persistence\ManagerRegistry;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
-use App\Entity\User;
-use App\Form\RegisterType;
-use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderValidator;
 
 class UserController extends AbstractController
 {
-    public function register(Request $request, UserPasswordEncoderValidator $encoder)
+
+    public function register(Request $request, UserPasswordHasherInterface $passwordHasher, ManagerRegistry $doctrine): Response
     {
-        //Crear el formulario
+        //CREAR EL FORMULARIO
         $user = new User();
         $form = $this->createForm(RegisterType::class, $user);
 
-        //Rellenar el objeto con los datos del form
+        //VINCULAR EL FORMULARIO CON EL OBJETO
         $form->handleRequest($request);
 
-        //Comprobar si el form se ha enviado
-        if ($form->isSubmitted()) {
-            //Modificando el objeto para guardarlo
+        //COMPROBAR SI SE ENVIÓ EL FORMULARIO
+        if ($form->isSubmitted() && $form->isValid()) {
+
+            //MODIFICANDO EL OBJETO PARA GUARDARLO
             $user->setRole('ROLE_USER');
-            //Cifrar contraseña
-            $encoded = $encoder->encodePassword($user, $user->getpassword());
-            $user->setpassword($encoded);
+            $user->setCreatedAt(new \DateTime('now'));
+
+            //CIFRAR LA CONTRASEÑA
+            $passwordHasher = $passwordHasher->hashPassword($user, $user->getPassword());
+            $user->setPassword($passwordHasher);
+
+            //GUARDAR EL USUARIO
+            $em = $doctrine->getManager();
+            $em->persist($user);
+            $em->flush();
+
+            return $this->redirectToRoute('tasks');
         }
 
         return $this->render('user/register.html.twig', [

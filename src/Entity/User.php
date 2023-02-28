@@ -2,10 +2,13 @@
 
 namespace App\Entity;
 
-use Doctrine\DBAL\Types\Types;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Validator\Constraints as Assert;
+
 
 /**
  * User
@@ -13,7 +16,7 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Table(name="users")
  * @ORM\Entity
  */
-class User
+class User implements PasswordAuthenticatedUserInterface, UserInterface
 {
     /**
      * @var int
@@ -35,6 +38,8 @@ class User
      * @var string|null
      *
      * @ORM\Column(name="name", type="string", length=100, nullable=true)
+     * @Assert\NotBlank
+     * @Assert\Regex("/[a-zA-Z]+/")
      */
     private $name;
 
@@ -42,6 +47,8 @@ class User
      * @var string|null
      *
      * @ORM\Column(name="surname", type="string", length=200, nullable=true)
+     * @Assert\NotBlank
+     * @Assert\Regex("/[a-zA-Z]+/")
      */
     private $surname;
 
@@ -49,6 +56,8 @@ class User
      * @var string|null
      *
      * @ORM\Column(name="email", type="string", length=255, nullable=true)
+     * @Assert\NotBlank
+     * @Assert\Email(message = "Please insert a valid email address")
      */
     private $email;
 
@@ -56,6 +65,7 @@ class User
      * @var string|null
      *
      * @ORM\Column(name="password", type="string", length=255, nullable=true)
+     * @Assert\NotBlank
      */
     private $password;
 
@@ -159,5 +169,26 @@ class User
     public function getTasks(): Collection
     {
         return $this->tasks;
+    }
+
+    public function getUsername()
+    {
+        return $this->email;
+    }
+
+    public function getUserIdentifier(): string
+    {
+        return $this->email;
+    }
+    public function getSalt()
+    {
+        return null;
+    }
+    public function getRoles(): array
+    {
+        return array('ROLE_USER');
+    }
+    public function eraseCredentials()
+    {
     }
 }
