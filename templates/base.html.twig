@@ -14,10 +14,14 @@
         <div id="header" class="center">
             <h1>Tareas Symfony</h1>
             <ul id="menu" class="center">
+                {% if app.user %}
                 <li><a href="{{ path('tasks') }}">Inicio<a/></li>
                 <li><a href="{{ path('tasks') }}">Mis tareas<a/></li>
+                <li><a href="{{ path('logout') }}">Cerrar sesión<a/></li>
+                {% else %}
                 <li><a href="{{ path('login') }}">Login<a/></li>
                 <li><a href="{{ path('register') }}">Registro<a/></li>
+                {% endif %}
             </ul>
         </div>
         <div class="clearfix"></div>
