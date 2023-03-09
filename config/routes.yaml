@@ -14,4 +14,4 @@ logout:
   path: /logout
 index:
   path: /
-  controller: App\Controller\UserController::login
+  controller: App\Controller\TaskController::index
